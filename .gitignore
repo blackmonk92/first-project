@@ -39,6 +39,9 @@ yarn-error.log*
 # local waitlist data (dummy storage)
 /.data/
 
+# claude code local state
+/.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
