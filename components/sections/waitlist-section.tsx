@@ -20,7 +20,7 @@ export function WaitlistSection() {
           </h2>
           <p className="mt-5 text-base leading-relaxed text-muted-foreground">
             정식 출시 전, 신청하신 분께 매주 토요일 아침
-            <br className="hidden md:block" />
+            <br />
             그 주말에 어울리는 코스 한 개를 직접 보내드립니다.
           </p>
         </div>

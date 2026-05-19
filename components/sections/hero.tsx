@@ -12,18 +12,20 @@ export function Hero() {
         <div className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <span className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
-            주말마다 반복되는 ‘어디 가지?’를 끝내는 가장 빠른 방법
+            이번 주말, 무엇을 하든 실패하지 않게
           </span>
           <h1 className="text-balance text-4xl font-semibold leading-[1.15] tracking-tight md:text-6xl">
-            <span className="block">날씨가 바뀌어도</span>
+            <span className="block">내 상황에 맞는 코스,</span>
             <span className="block">
-              <span className="text-brand">실패하지 않는</span> 근교 코스
+              <span className="text-brand">고민 없이</span> 한 번에
             </span>
           </h1>
           <p className="mt-7 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
-            출발 지역·이동 시간·동행자만 고르면, 날씨와 상황 변화에도
+            출발지·이동시간·동행자만 골라도 충분해요.
             <br className="hidden md:block" />
-            흔들리지 않는 당일치기 드라이브 코스를 30초 안에 받아보세요.
+            가고 싶어 저장해둔 장소가 있다면 함께 알려주세요
+            <br className="hidden md:block" />
+            <span className="text-brand">▶</span> 그 장소를 중심으로 코스를 다시 짜드릴게요.
           </p>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
             <a
@@ -42,11 +44,13 @@ export function Hero() {
                 "h-12 rounded-full px-7 text-base font-medium"
               )}
             >
-              주말 코스 먼저 받아보기
+              예시 코스 보기
             </a>
           </div>
           <p className="mt-6 text-xs text-muted-foreground">
-            대기자에게 매주 토요일 아침, 그 주말에 어울리는 코스를 미리 보내드립니다.
+            가고 싶은 장소가 없어도 괜찮아요.
+            <br className="md:hidden" />
+            {" "}조건만 골라도 코스를 추천해드려요.
           </p>
         </div>
       </div>

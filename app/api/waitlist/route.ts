@@ -8,8 +8,14 @@ const dataFile = path.join(dataDir, "waitlist.json");
 type Entry = {
   email: string;
   region?: string;
-  courseType?: string;
-  mood?: string;
+  tripType?: string;
+  travelTime?: string;
+  companion?: string;
+  ageGroups?: string[];
+  moods?: string[];
+  indoorOutdoor?: string;
+  planB?: string;
+  place?: string;
   createdAt: string;
 };
 
@@ -33,8 +39,20 @@ export async function POST(req: Request) {
   const entry: Entry = {
     email,
     region: body?.region || undefined,
-    courseType: body?.courseType || undefined,
-    mood: body?.mood || undefined,
+    tripType: body?.tripType || undefined,
+    travelTime: body?.travelTime || undefined,
+    companion: body?.companion || undefined,
+    ageGroups:
+      Array.isArray(body?.ageGroups) && body.ageGroups.length > 0
+        ? body.ageGroups
+        : undefined,
+    moods:
+      Array.isArray(body?.moods) && body.moods.length > 0
+        ? body.moods
+        : undefined,
+    indoorOutdoor: body?.indoorOutdoor || undefined,
+    planB: body?.planB || undefined,
+    place: body?.place?.trim() || undefined,
     createdAt: new Date().toISOString(),
   };
 
