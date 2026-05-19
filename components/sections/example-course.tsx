@@ -153,7 +153,7 @@ export function ExampleCourse() {
                     className="flex flex-col items-center justify-center gap-2 px-4 py-3 sm:py-4"
                   >
                     <p className="text-xs text-muted-foreground">{m.label}</p>
-                    {"percent" in m ? (
+                    {typeof m.percent === "number" ? (
                       <Donut percent={m.percent} />
                     ) : (
                       <p className="font-medium">{m.value}</p>
