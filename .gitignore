@@ -42,6 +42,9 @@ yarn-error.log*
 # claude code local state
 /.claude/
 
+# MCP local config (개인 환경 설정)
+.mcp.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
