@@ -522,10 +522,44 @@
   토스트 정상. 모바일은 LAN IP HTTP라 secure context 위반으로 silent
   fail — production HTTPS 배포 후 검증 예정.
 
-### 다음 세션 이어갈 항목
-1. **단계 5-C-2** — `/r/invalid-text` 같은 비-UUID 경로 404 graceful 처리
-2. **단계 6** — 배포 준비. 작업 목록은 "단계 6 (배포 준비) 작업 메모"
-   섹션 참조.
+### 단계 5-C-2 비-UUID 경로 404 graceful 처리 완료
+- `app/r/[id]/page.tsx`에 UUID 정규식 가드 추가 (DB 쿼리 전 분기로
+  HTTP 500 → 404)
+- `app/r/[id]/not-found.tsx` 신규 (segment 전용) — "이 추천 결과를
+  찾을 수 없어요 / 잘못된 링크이거나 삭제된 결과일 수 있어요" +
+  "다시 추천 받기" CTA
+- 단계 6 메모에 "전역 `app/not-found.tsx` 추가" 항목 후속으로 등록
+
+### refactor(region) — community 공통 lib/regions.ts import 이동
+- 단계 4 추천 기능 작업 중 region 개념을 추천·커뮤니티 공통으로
+  끌어올린 lib/regions.ts에서 모든 모듈이 직접 import하도록 마무리.
+  community 7개 파일의 import 경로만 정리, 동작 변경 없음.
+
+### 단계 6 Phase 1 일부 — 1차 공개 카피·네비게이션 정비 (commit 1)
+- Hero CTA "출시 알림 신청하기" → "추천 받아보기", #waitlist →
+  #recommend (메인에 waitlist 섹션 빠진 상태의 dead link 해결)
+- 상단 네비 강조 CTA "추천 받아보기" (데스크탑은 정보 탭 끝, 모바일은
+  헤더 우측 항상 노출)
+- 모바일 햄버거 MobileNav 신규 — 정보 탭·인증을 dropdown 안으로,
+  외부 클릭·ESC 닫기, CJK 글자 단위 wrap 차단(block + whitespace-nowrap)
+- recommend-form 안내 문구 출시 톤 색깔 제거 ("향후 이메일 발송
+  (준비 중)" → "추후 서비스 소식 안내")
+- 커뮤니티 글쓰기 버튼 모바일 풀폭 정렬 수정 (flex-col stretch →
+  items-start로 content fit)
+- 결정 이유: "추천 받아보기"는 핵심 액션이라 모바일에서도 즉시 접근,
+  정보 탭·로그인은 햄버거 안으로 (회원가입이 외부 노출이고 추천이
+  숨겨진 역설 해소)
+
+### 다음 세션(2026-05-28) 이어갈 항목
+
+**내일 시작 지점: 커밋 2 [2.1] 마이그레이션 SQL 적용부터.**
+
+1. **커밋 2** (post_type + 의견 영역 + 카테고리 필터) — 단계 6 메모의
+   "커밋 2 작업 순서" 표 따라 [2.1] ~ [2.12] 순차 진행
+2. **닉네임 제도 도입** (1차 공개 전 필수) — 단계 6 메모의 신규 항목
+   참조. 커밋 2 완료 직후 진입. 정책 결정 의논부터.
+3. 단계 6 Phase 1 나머지(OG 메타·전역 not-found·디버그 로그)
+4. Phase 2 인프라(OpenRouter 충전·Vercel 환경변수) + Phase 3 배포·검증
 
 ---
 
@@ -569,3 +603,108 @@
   있음(단계 5-C-2). 다른 경로(예: `/community/[postId]` 잘못된 ID, 임의
   존재하지 않는 경로 등)에서도 일관된 친절한 404 페이지를 제공하려면
   전역 not-found 추가 필요. segment별 not-found가 우선이라 충돌 없음.
+
+---
+
+## 단계 6 Phase 1 — 커밋 2 작업 순서 표 (post_type + 의견 영역)
+
+**시작 시점**: 2026-05-28 첫 작업으로 진입.
+**커밋 메시지 prefix**: `feat(community)`
+
+### 결정 사항 요약
+- **데이터 모델**: 단일 `category` 컬럼 + `post_type` discriminator
+  (별도 컬럼·테이블 분리는 likes/comments 연결·백필·NULL 관리 부담 큼)
+- **URL 경로**: `/community/feedback` (segment 분리 — 의견도 커뮤니티
+  성격이라 같은 도메인 하위, 페이지·필터·작성 폼 독립)
+- **의견 영역 카테고리 4개**: 버그 신고 / 개선 제안 / 질문 / 후기·칭찬
+  ("기타"는 의도적 제외 — 분류 가치 살리기 위해)
+
+### 마이그레이션 SQL (적용 전 검토 완료)
+
+```sql
+-- Migration: posts_add_post_type_and_feedback
+ALTER TABLE public.posts ADD COLUMN post_type text NOT NULL DEFAULT 'place';
+
+ALTER TABLE public.posts ADD CONSTRAINT posts_post_type_check
+  CHECK (post_type IN ('place', 'feedback'));
+
+ALTER TABLE public.posts ALTER COLUMN region DROP NOT NULL;
+
+ALTER TABLE public.posts DROP CONSTRAINT posts_category_check;
+
+ALTER TABLE public.posts ADD CONSTRAINT posts_category_check
+  CHECK (
+    (post_type = 'place' AND category IN (
+      '맛집', '카페', '명소', '전시·공연', '자연', '숙소', '쇼핑'
+    ))
+    OR (post_type = 'feedback' AND category IN (
+      '버그 신고', '개선 제안', '질문', '후기·칭찬'
+    ))
+  );
+
+ALTER TABLE public.posts ADD CONSTRAINT posts_region_required_for_place
+  CHECK (
+    (post_type = 'place' AND region IS NOT NULL)
+    OR (post_type = 'feedback')
+  );
+```
+
+백필: 기존 row 1개는 `default 'place'`로 자동 처리. backward-compatible
+(default 유지 — 코드가 post_type 안 명시해도 'place'로 들어감).
+
+### 작업 순서 표
+
+| # | 작업 | 안전 멈춤 |
+|---|---|---|
+| 2.1 | 마이그레이션 SQL 사용자 승인 → `apply_migration` 적용 | ✅ default 'place'로 backward-compatible, 코드 미반영 상태에서도 기존 동작 정상 |
+| 2.2 | `lib/community/categories.ts` — `PLACE_CATEGORIES` + `FEEDBACK_CATEGORIES` + `PostType` + `Category` union | ✅ |
+| 2.3 | `lib/community/types.ts` — `Post`에 `postType` 추가, `region` nullable | ✅ |
+| 2.4 | `lib/community/queries.ts` — `parsePostTypeFilter` + `parseCategoryFilter` + `listPosts({ postType, region, category })` | ✅ |
+| 2.5 | `components/community/category-filter.tsx` 신규 (region-filter 패턴 복제) | ✅ |
+| 2.6 | `app/community/feedback/page.tsx` 신규 — 의견 영역 페이지 + CategoryFilter UI + 안내 문구 | ⚠️ **2.6~2.8 위험 묶음** — 페이지·폼이 같이 연결돼야 의미 |
+| 2.7 | `app/community/feedback/new/page.tsx` 신규 — 의견 작성 폼 페이지 | ⚠️ 2.6·2.8과 묶음 |
+| 2.8 | `components/community/feedback-form.tsx` 신규 — 의견용 폼 (region 없이, feedback category) | ⚠️ 2.6·2.7과 묶음 |
+| 2.9 | 두 페이지 상단 sub-nav 토글 — `[장소 추천] [의견 모음]` | ✅ |
+| 2.10 | `site-footer.tsx` — "출시 알림 신청" + `#waitlist` → "의견 남기기" + `/community/feedback` | ✅ |
+| 2.11 | dev 미리보기 (사용자 확인) | ✅ |
+| 2.12 | git add + commit 2 | ✅ 완료 |
+
+### 커밋 2 메시지 (이미 검토·승인 완료)
+
+설계 의도 포함 — 6개월 후에도 파악 가능. 본문에 4가지 결정 이유 한 줄씩:
+post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
+/community/feedback segment 분리 이유 / 의견 영역 카테고리 4개.
+구체 본문은 [2.12] 직전 다시 확인.
+
+---
+
+## 단계 6 Phase 1 — 닉네임 제도 도입 (1차 공개 전 필수)
+
+**우선순위**: 1차 공개 배포 차단 항목. 커밋 2 완료 직후 진입.
+
+### 배경
+- 현재 커뮤니티 글 작성자가 이메일 앞부분(예: `dlgpfus211`)으로 표시됨
+- `@naver.com`·`@gmail.com` 같은 일반 포털 도메인 붙이면 실제 이메일
+  추측 가능 → 봇 크롤링·스팸·피싱·credential stuffing 공격에 활용 가능
+- 개인정보보호 법적 리스크. 1차 공개 전 반드시 차단.
+
+### 작업 범위
+- DB 마이그레이션: `profiles` 테이블 또는 `users.nickname` 컬럼 추가
+- 회원가입 흐름: 닉네임 입력 단계 추가 (기존 폼 분기)
+- 기존 사용자 마이그레이션: 닉네임 미설정 사용자 처리 (강제 입력 모달 vs
+  자동 생성 vs 첫 글 작성 시 입력)
+- 표시 변경: 커뮤니티 글·댓글에서 이메일 앞부분 대신 닉네임 노출
+
+### 정책 결정 (작업 전 확정 필요)
+- 중복 허용 여부
+- 변경 가능 횟수 (예: 30일 1회 / 무제한 / 평생 1회)
+- 욕설·부적절 단어 필터 (간단 blocklist vs 외부 API)
+- 글자 수 제한 (예: 2~20자)
+- 최초 미설정 사용자 처리 방식
+
+### 작업 추정
+1.5~2.5시간 (정책 결정 + 마이그레이션 + 흐름 분기 + 표시 변경).
+
+### 진행 순서
+커밋 2 완료 → 정책 결정 의논 → 마이그레이션 SQL 검토·승인 → 코드 변경
+→ dev 미리보기 → 커밋.
