@@ -29,13 +29,13 @@ export function Hero() {
           </p>
           <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
             <a
-              href="#waitlist"
+              href="#recommend"
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "h-12 rounded-full bg-brand px-7 text-base font-medium text-brand-foreground hover:bg-brand/90"
               )}
             >
-              출시 알림 신청하기
+              추천 받아보기
             </a>
             <a
               href="#preview"

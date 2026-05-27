@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/app/auth/actions";
+import { MobileNav } from "./mobile-nav";
 
 export async function SiteHeader() {
   const supabase = await createClient();
@@ -18,6 +19,8 @@ export async function SiteHeader() {
             오늘 어디 갈래?
           </span>
         </Link>
+
+        {/* 데스크탑 정보 탭 + 강조 CTA — md 이상 */}
         <nav className="hidden items-center gap-7 text-sm text-muted-foreground md:flex">
           <a href="/#problem" className="hover:text-foreground transition-colors">
             왜 필요한가요
@@ -31,8 +34,16 @@ export async function SiteHeader() {
           <Link href="/community" className="hover:text-foreground transition-colors">
             커뮤니티
           </Link>
+          <a
+            href="/#recommend"
+            className="inline-flex rounded-full bg-brand px-3.5 py-1.5 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
+          >
+            추천 받아보기
+          </a>
         </nav>
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+
+        {/* 데스크탑 인증 영역 — md 이상 */}
+        <div className="hidden shrink-0 items-center gap-2 sm:gap-3 md:flex">
           {user ? (
             <>
               <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground sm:inline">
@@ -51,18 +62,29 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/login"
-                className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
                 로그인
               </Link>
               <Link
                 href="/signup"
-                className="rounded-full bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90 sm:px-4 sm:py-2 sm:text-sm"
+                className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
               >
                 회원가입
               </Link>
             </>
           )}
+        </div>
+
+        {/* 모바일 우측: 강조 CTA + 햄버거 — md 미만 */}
+        <div className="flex shrink-0 items-center gap-2 md:hidden">
+          <a
+            href="/#recommend"
+            className="inline-flex rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-brand-foreground transition-opacity hover:opacity-90"
+          >
+            추천 받아보기
+          </a>
+          <MobileNav userEmail={user?.email ?? null} />
         </div>
       </div>
     </header>

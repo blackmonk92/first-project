@@ -52,7 +52,7 @@ export default async function CommunityPage({
         </section>
 
         <section className="mx-auto w-full max-w-6xl px-6 py-10 md:py-14">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
             <RegionFilter active={activeRegion} />
             <Link
               href={writeHref}

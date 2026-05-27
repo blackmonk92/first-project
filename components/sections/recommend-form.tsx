@@ -593,7 +593,7 @@ export function RecommendForm() {
       )}
 
       <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
-        입력 정보는 추천 결과 생성과 향후 이메일 발송(준비 중) 외에 사용되지 않아요.
+        입력 정보는 추천 결과 생성과 추후 서비스 소식 안내 외에 사용되지 않아요.
       </p>
     </form>
   );
