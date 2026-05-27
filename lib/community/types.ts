@@ -1,5 +1,5 @@
 import type { Category } from "./categories";
-import type { Region } from "./regions";
+import type { Region } from "@/lib/regions";
 
 export type Post = {
   id: string;

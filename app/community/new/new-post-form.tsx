@@ -12,12 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  REGIONS,
-  isRegion,
-  placeUrlHint,
-  type Region,
-} from "@/lib/community/regions";
+import { REGIONS, isRegion, type Region } from "@/lib/regions";
+import { placeUrlHint } from "@/lib/community/regions";
 import {
   CATEGORIES,
   isCategory,

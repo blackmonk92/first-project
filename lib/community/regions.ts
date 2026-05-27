@@ -1,30 +1,7 @@
-// 이 목록은 Supabase posts.region CHECK 제약과 1:1 동기화되어야 합니다.
-// 값 추가/변경 시 마이그레이션도 함께 갱신하세요.
-export const REGIONS = [
-  "서울",
-  "인천",
-  "경기",
-  "강원",
-  "대전",
-  "세종",
-  "충북",
-  "충남",
-  "부산",
-  "울산",
-  "경북",
-  "경남",
-  "전북",
-  "전남",
-  "광주",
-  "제주",
-  "해외",
-] as const;
+import type { Region } from "@/lib/regions";
 
-export type Region = (typeof REGIONS)[number];
-
-export function isRegion(value: unknown): value is Region {
-  return typeof value === "string" && (REGIONS as readonly string[]).includes(value);
-}
+// REGIONS, Region, isRegion은 @/lib/regions로 이동했습니다.
+// 이 파일에는 community 도메인 특화 헬퍼만 남깁니다.
 
 export function placeUrlHint(region: Region | null): string {
   if (region === "해외") {

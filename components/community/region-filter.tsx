@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
-import { REGIONS } from "@/lib/community/regions";
+import { REGIONS } from "@/lib/regions";
 import type { RegionFilter as RegionFilterValue } from "@/lib/community/queries";
 
 export function RegionFilter({ active }: { active: RegionFilterValue }) {

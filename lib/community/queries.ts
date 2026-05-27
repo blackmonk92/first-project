@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { isRegion, type Region } from "./regions";
+import { isRegion, type Region } from "@/lib/regions";
 import {
   DEFAULT_POST_SORT,
   buildPostOrderClause,

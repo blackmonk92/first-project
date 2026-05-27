@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { Region } from "@/lib/community/regions";
+import type { Region } from "@/lib/regions";
 
 export function RegionTag({
   region,

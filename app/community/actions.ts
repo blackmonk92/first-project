@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { isRegion } from "@/lib/community/regions";
+import { isRegion } from "@/lib/regions";
 import { isCategory } from "@/lib/community/categories";
 
 export type CreatePostValues = {
