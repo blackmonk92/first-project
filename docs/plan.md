@@ -563,3 +563,9 @@
   (1) Android Chrome / iOS Safari에서 시스템 공유 시트 정상 호출
   (2) "링크 복사" 클립보드 정상 작동
   (3) 카톡 미리보기 카드 표시 (OG 메타 적용 후)
+
+### 기타 사용성 디테일
+- **전역 `app/not-found.tsx` 추가** — 현재는 `/r/[id]/not-found.tsx`만
+  있음(단계 5-C-2). 다른 경로(예: `/community/[postId]` 잘못된 ID, 임의
+  존재하지 않는 경로 등)에서도 일관된 친절한 404 페이지를 제공하려면
+  전역 not-found 추가 필요. segment별 not-found가 우선이라 충돌 없음.

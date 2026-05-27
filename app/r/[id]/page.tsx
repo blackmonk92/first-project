@@ -6,12 +6,20 @@ import { RecommendShare } from "@/components/sections/recommend-share";
 import { getCuratedPlaces } from "@/lib/curation/queries";
 import { getRecommendationById } from "@/lib/recommend/store";
 
+// id 컬럼이 PostgreSQL uuid 타입이라 비-UUID 문자열을 넘기면 Supabase가
+// "invalid input syntax for type uuid" 에러를 던져 500이 떴다.
+// DB 쿼리 전 형식 검사로 500 → 404로 분기.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function RecommendationResultPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  if (!UUID_RE.test(id)) notFound();
 
   const record = await getRecommendationById(id);
   if (!record) notFound();
