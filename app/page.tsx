@@ -4,7 +4,7 @@ import { Problem } from "@/components/sections/problem";
 import { Features } from "@/components/sections/features";
 import { ExampleCourse } from "@/components/sections/example-course";
 import { CommunityPreview } from "@/components/sections/community-preview";
-import { WaitlistSection } from "@/components/sections/waitlist-section";
+import { RecommendSection } from "@/components/sections/recommend-section";
 import { SiteFooter } from "@/components/sections/site-footer";
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
         <Features />
         <ExampleCourse />
         <CommunityPreview />
-        <WaitlistSection />
+        <RecommendSection />
       </main>
       <SiteFooter />
     </>
