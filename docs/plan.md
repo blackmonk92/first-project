@@ -480,7 +480,7 @@
 
 ## 작업 일지 — 2026-05-27
 
-오늘 처리한 항목 (단계 5-B 후속 + 검증 산출물 정리):
+오늘 처리한 항목 (단계 5-B 후속 + 검증 산출물 정리 + 단계 5-C-1 완료):
 
 ### 단계 5-B 후속 — OpenRouter 402 해결
 - **원인**: 어제 폼 실패 "AI 추천 생성에 실패했어요" 버그. dev.log 분석
@@ -505,3 +505,61 @@
   `test2[abcdefg].*`, `.tmp-recommend-body.json`). `.gitignore`에
   `/_verify/`, `dev.log` 추가.
 - `dev.log`는 유지(단계 6 임시 디버그 로그 정리 시 같이 삭제).
+
+### 단계 5-C-1 공유 기능 완료
+- **신규 `components/sections/recommend-share.tsx`** — 두 variant:
+  `icon`(상단 작은 아이콘) / `block`(하단 명시 버튼 영역). `shareOrCopy`
+  통합 함수로 `navigator.share` 시도 → 미지원·secure context 위반·기타
+  실패 시 자동 clipboard 폴백. 두 버튼(공유하기·링크 복사) 항상 렌더,
+  동작만 환경별 분기. catch 블록에 `console.warn` 추가(silent fail
+  가시화).
+- 공유 텍스트 포맷: `"[오늘 어디 갈래?] {region}·{regionDetail}·{companion}
+  주말 코스 추천\n{URL}"`. 누락 필드는 자연스럽게 건너뜀.
+- **`app/r/[id]/page.tsx`** — 상단 헤더 우측(`variant="icon"`) + 마지막
+  카드 아래(`variant="block"`) 두 군데 통합. 결과 페이지 전체(플랜 A·B
+  모두 포함) 공유.
+- **데스크탑 검증 통과**: 두 버튼 + 상단 아이콘 모두 클립보드 복사 +
+  토스트 정상. 모바일은 LAN IP HTTP라 secure context 위반으로 silent
+  fail — production HTTPS 배포 후 검증 예정.
+
+### 다음 세션 이어갈 항목
+1. **단계 5-C-2** — `/r/invalid-text` 같은 비-UUID 경로 404 graceful 처리
+2. **단계 6** — 배포 준비. 작업 목록은 "단계 6 (배포 준비) 작업 메모"
+   섹션 참조.
+
+---
+
+## 단계 6 (배포 준비) 작업 메모
+
+1차 공개 직전에 한 번에 정리할 항목. 단계 5-C(공유 기능) 완료 후 진입.
+
+### 환경 / 인프라
+- Vercel 환경변수 설정 (`OPENROUTER_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`,
+  `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL` 등)
+- 도메인 연결, production 빌드 검증
+- OpenRouter 크레딧 충전 (1차 공개 트래픽 대비)
+- `app/api/recommend/route.ts`의 임시 디버그 로그
+  `console.log("[recommend] ...")` (`TODO(temp-debug)` 마커) 제거
+
+### 메인 화면 카피 정리
+- **CTA 버튼 문구 수정** — 현재 "출시 알림 신청하기"인데, 추천 기능이
+  실제 작동하니까 "추천 받아보기" 같은 문구로 교체. 액션 지점도 추천
+  폼(`/#recommend` 또는 직접 폼 섹션)으로 변경.
+- **부제·서브카피 1차 공개 시점 톤 점검** — 랜딩 페이지 전반의 카피를
+  "출시 전 대기자 모집" 톤에서 "실제 사용 가능" 톤으로 정합성 맞추기.
+  (Hero 문구, Problem 섹션, 작동방식, 예시 코스 카드 주변 카피 포함)
+
+### 공유 미리보기 (OG 메타) + 모바일 production 검증
+- **OG 메타 태그 세팅** — 결과 페이지(`/r/[id]`)에 `og:title`,
+  `og:description`, `og:image` 추가. 카톡으로 공유 URL 보낼 때 미리보기
+  카드가 예쁘게 뜨도록.
+- 5-C-1에서 도입한 공유 텍스트 포맷("[오늘 어디 갈래?] 서울·신촌·혼자
+  주말 코스 추천")과 톤 일관성 맞추기.
+- og:image는 정적 이미지부터 시작하고, 여유 되면 동적 OG 이미지
+  (입력 조건·플랜 제목 합성) 검토.
+- **모바일 share/clipboard production HTTPS 검증** — 5-C-1 공유 기능은
+  LAN IP HTTP 환경에선 secure context 위반으로 silent fail(코드 문제
+  아님). Vercel HTTPS 배포 후 실제 폰에서 확인:
+  (1) Android Chrome / iOS Safari에서 시스템 공유 시트 정상 호출
+  (2) "링크 복사" 클립보드 정상 작동
+  (3) 카톡 미리보기 카드 표시 (OG 메타 적용 후)
