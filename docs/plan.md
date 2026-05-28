@@ -563,6 +563,62 @@
 
 ---
 
+## 작업 일지 — 2026-05-28
+
+### 커밋 2 완료 — 의견(feedback) 영역 도입 (commit d34765a)
+단계 6 Phase 1 커밋 2 [2.1]~[2.12] 전부 완료. origin/main 대비 7 commits ahead.
+
+**마이그레이션 2건 (Supabase 원격 적용 완료):**
+- `posts_add_post_type_and_feedback`: post_type 컬럼(default 'place') +
+  조건부 category CHECK(place 7 / feedback 4) + region nullable +
+  place 글 region NOT NULL 강제 CHECK. 기존 row 1개는 default로 자동 백필.
+- `posts_with_counts_add_post_type`: 뷰에 post_type 노출. **plan SQL에 누락
+  발견** — 뷰에 컬럼이 없으면 listPosts의 `.eq('post_type')`가 기존
+  `/community`까지 깨뜨림. 적용 후 회귀(HTTP 200·로그 무에러) 확인.
+
+**코드 (15 파일):**
+- `categories.ts` — PLACE/FEEDBACK 분리 + `PostType`/`Category` union +
+  `isPlaceCategory`/`isFeedbackCategory`/`categoriesFor`/`isCategoryFor`
+- `types.ts` — `Post.post_type` 추가, `region: Region | null`
+- `queries.ts` — `parseCategoryFilter(value, postType)` + `CategoryFilter` +
+  `listPosts`에 `postType`(default place)·`category` 필터.
+  ※ `parsePostTypeFilter`는 생략(segment 분리로 라우트가 postType 결정)
+- 신규: `category-filter.tsx`(categories·basePath 주입형),
+  `community-nav.tsx`(영역 토글), `feedback-form.tsx`,
+  `feedback/page.tsx`, `feedback/new/page.tsx`
+- `actions.ts` — `createFeedback` 서버 액션 + 기존 createPost에
+  `post_type:'place'` 명시
+- 파생: `region-tag`(null 허용→렌더 생략), `post-card-list`(description
+  ReactNode), 상세 페이지 백링크 post_type 분기, footer 교체
+- 반응형 줄바꿈: 의견 hero 서브카피·EmptyState 안내문을 `sm:hidden` br로
+  모바일만 의미 단위 줄바꿈(데스크탑 1줄 유지)
+
+**검증:** tsc 0 에러, dev 캡쳐(데스크탑·모바일) 통과, 의견 글 작성
+end-to-end 정상(사용자 확인), `/community` 회귀 없음.
+
+### 다음 작업 — 우선순위 순
+
+**1. 닉네임 제도 도입 (1차 공개 전 필수 · 배포 차단 항목)**
+   - 진입 전 정책 5항목 확정 필요: 중복 허용 / 변경 횟수 / 욕설 필터 /
+     글자수 / 최초 미설정 사용자 처리.
+   - 상세: 아래 "단계 6 Phase 1 — 닉네임 제도 도입" 섹션 + memory
+     `project-nickname-system`. 작성자 표시(현재 이메일 @앞)가 보안
+     리스크라 가장 먼저 처리.
+
+**2. 단계 6 Phase 1 나머지**
+   - #7 전역 `app/not-found.tsx` 추가 (현재 `/r/[id]/not-found.tsx`만 존재)
+   - #8 `app/api/recommend/route.ts` 임시 디버그 로그(`TODO(temp-debug)`) 제거
+   - #6 결과 페이지(`/r/[id]`) OG 메타(og:title/description/image)
+
+**3. 단계 6 Phase 2 — 인프라**
+   - OpenRouter 크레딧 충전, Vercel 환경변수 설정
+
+**4. 단계 6 Phase 3 — 배포·검증**
+   - production 빌드, 도메인 연결, 모바일 share/clipboard HTTPS 검증,
+     카톡 OG 미리보기 확인
+
+---
+
 ## 단계 6 (배포 준비) 작업 메모
 
 1차 공개 직전에 한 번에 정리할 항목. 단계 5-C(공유 기능) 완료 후 진입.
@@ -608,7 +664,8 @@
 
 ## 단계 6 Phase 1 — 커밋 2 작업 순서 표 (post_type + 의견 영역)
 
-**시작 시점**: 2026-05-28 첫 작업으로 진입.
+**상태**: ✅ 완료 (2026-05-28, commit d34765a). 마이그레이션 2건 Supabase 적용 +
+코드 15파일 커밋. 상세는 "작업 일지 — 2026-05-28" 참조.
 **커밋 메시지 prefix**: `feat(community)`
 
 ### 결정 사항 요약
