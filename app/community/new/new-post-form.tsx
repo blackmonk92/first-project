@@ -15,9 +15,9 @@ import {
 import { REGIONS, isRegion, type Region } from "@/lib/regions";
 import { placeUrlHint } from "@/lib/community/regions";
 import {
-  CATEGORIES,
-  isCategory,
-  type Category,
+  PLACE_CATEGORIES,
+  isPlaceCategory,
+  type PlaceCategory,
 } from "@/lib/community/categories";
 import { createPost, type CreatePostState } from "@/app/community/actions";
 
@@ -32,19 +32,19 @@ export function NewPostForm() {
     state?.values?.region && isRegion(state.values.region)
       ? state.values.region
       : "";
-  const initialCategory: Category | "" =
-    state?.values?.category && isCategory(state.values.category)
+  const initialCategory: PlaceCategory | "" =
+    state?.values?.category && isPlaceCategory(state.values.category)
       ? state.values.category
       : "";
 
   const [region, setRegion] = useState<Region | "">(initialRegion);
-  const [category, setCategory] = useState<Category | "">(initialCategory);
+  const [category, setCategory] = useState<PlaceCategory | "">(initialCategory);
 
   useEffect(() => {
     if (state?.values?.region && isRegion(state.values.region)) {
       setRegion(state.values.region);
     }
-    if (state?.values?.category && isCategory(state.values.category)) {
+    if (state?.values?.category && isPlaceCategory(state.values.category)) {
       setCategory(state.values.category);
     }
   }, [state]);
@@ -104,7 +104,7 @@ export function NewPostForm() {
             <input type="hidden" name="category" value={category} />
             <Select
               value={category}
-              onValueChange={(v) => setCategory(v as Category)}
+              onValueChange={(v) => setCategory(v as PlaceCategory)}
             >
               <SelectTrigger
                 id="category"
@@ -113,7 +113,7 @@ export function NewPostForm() {
                 <SelectValue placeholder="장소 구분을 선택해주세요" />
               </SelectTrigger>
               <SelectContent>
-                {CATEGORIES.map((c) => (
+                {PLACE_CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
                   </SelectItem>

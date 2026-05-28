@@ -1,11 +1,12 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { PostCard } from "@/components/community/post-card";
 import type { PostWithCounts } from "@/lib/community/types";
 
 type EmptyStateProps = {
   title: string;
-  description: string;
+  description: ReactNode;
   cta?: { href: string; label: string };
 };
 

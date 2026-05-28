@@ -5,9 +5,11 @@ export function RegionTag({
   region,
   className,
 }: {
-  region: Region;
+  region: Region | null;
   className?: string;
 }) {
+  // 의견(feedback) 글은 지역이 없어 태그를 표시하지 않습니다.
+  if (!region) return null;
   return (
     <span
       className={cn(

@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { isRegion, type Region } from "@/lib/regions";
 import {
+  isCategoryFor,
+  type Category,
+  type PostType,
+} from "./categories";
+import {
   DEFAULT_POST_SORT,
   buildPostOrderClause,
   type PostSort,
@@ -8,14 +13,26 @@ import {
 import type { CommentWithAuthor, PostWithCounts } from "./types";
 
 export type RegionFilter = Region | "all";
+export type CategoryFilter = Category | "all";
 
 export function parseRegionFilter(value: string | undefined | null): RegionFilter {
   if (!value || value === "all") return "all";
   return isRegion(value) ? value : "all";
 }
 
+// 카테고리 후보는 post_type별로 다르므로 어떤 영역의 필터인지 함께 받습니다.
+export function parseCategoryFilter(
+  value: string | undefined | null,
+  postType: PostType,
+): CategoryFilter {
+  if (!value || value === "all") return "all";
+  return isCategoryFor(postType, value) ? (value as Category) : "all";
+}
+
 export type ListPostsOptions = {
+  postType?: PostType;
   region?: RegionFilter;
+  category?: CategoryFilter;
   sort?: PostSort;
   limit?: number;
 };
@@ -23,13 +40,26 @@ export type ListPostsOptions = {
 export async function listPosts(
   options: ListPostsOptions = {},
 ): Promise<PostWithCounts[]> {
-  const { region = "all", sort = DEFAULT_POST_SORT, limit } = options;
+  const {
+    postType = "place",
+    region = "all",
+    category = "all",
+    sort = DEFAULT_POST_SORT,
+    limit,
+  } = options;
   const supabase = await createClient();
 
-  let query = supabase.from("posts_with_counts").select("*");
+  let query = supabase
+    .from("posts_with_counts")
+    .select("*")
+    .eq("post_type", postType);
 
   if (region !== "all") {
     query = query.eq("region", region);
+  }
+
+  if (category !== "all") {
+    query = query.eq("category", category);
   }
 
   const order = buildPostOrderClause(sort);

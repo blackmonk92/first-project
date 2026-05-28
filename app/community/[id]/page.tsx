@@ -41,6 +41,9 @@ export default async function CommunityPostPage({
   ]);
 
   const canDeletePost = !!user && user.id === post.user_id;
+  const isFeedback = post.post_type === "feedback";
+  const backHref = isFeedback ? "/community/feedback" : "/community";
+  const backLabel = isFeedback ? "← 의견 모음으로" : "← 커뮤니티로";
 
   return (
     <>
@@ -48,10 +51,10 @@ export default async function CommunityPostPage({
       <main className="flex-1">
         <article className="mx-auto w-full max-w-3xl px-6 py-14 md:py-20">
           <Link
-            href="/community"
+            href={backHref}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
-            ← 커뮤니티로
+            {backLabel}
           </Link>
 
           <div className="mt-6 flex flex-wrap items-center gap-2">

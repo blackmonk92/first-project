@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/60">
@@ -9,9 +11,12 @@ export function SiteFooter() {
         </div>
         <div className="flex items-center gap-6">
           <span>© {new Date().getFullYear()} Weekend Drive</span>
-          <a href="#waitlist" className="hover:text-foreground transition-colors">
-            출시 알림 신청
-          </a>
+          <Link
+            href="/community/feedback"
+            className="hover:text-foreground transition-colors"
+          >
+            의견 남기기
+          </Link>
         </div>
       </div>
     </footer>

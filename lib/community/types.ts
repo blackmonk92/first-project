@@ -1,12 +1,14 @@
-import type { Category } from "./categories";
+import type { Category, PostType } from "./categories";
 import type { Region } from "@/lib/regions";
 
 export type Post = {
   id: string;
   user_id: string;
+  post_type: PostType;
   title: string;
   content: string;
-  region: Region;
+  // 의견(feedback) 글은 지역이 없으므로 nullable.
+  region: Region | null;
   category: Category;
   place_name: string | null;
   place_url: string | null;

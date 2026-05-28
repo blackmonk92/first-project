@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { isRegion } from "@/lib/regions";
-import { isCategory } from "@/lib/community/categories";
+import { isFeedbackCategory, isPlaceCategory } from "@/lib/community/categories";
 
 export type CreatePostValues = {
   title: string;
@@ -49,13 +49,14 @@ export async function createPost(
     return { error: "내용은 1000자 이하로 입력해주세요.", values };
   if (!isRegion(values.region))
     return { error: "지역을 선택해주세요.", values };
-  if (!isCategory(values.category))
+  if (!isPlaceCategory(values.category))
     return { error: "장소 구분을 선택해주세요.", values };
 
   const { data, error } = await supabase
     .from("posts")
     .insert({
       user_id: user.id,
+      post_type: "place",
       title: values.title,
       content: values.content,
       region: values.region,
@@ -72,6 +73,66 @@ export async function createPost(
 
   revalidatePath("/community");
   revalidatePath("/");
+  redirect(`/community/${data.id}`);
+}
+
+export type CreateFeedbackValues = {
+  title: string;
+  content: string;
+  category: string;
+};
+
+export type CreateFeedbackState = {
+  error?: string;
+  values?: CreateFeedbackValues;
+} | null;
+
+// 의견(feedback) 글: 지역·장소 없이 제목·내용·feedback 카테고리만 받는다.
+export async function createFeedback(
+  _prev: CreateFeedbackState,
+  formData: FormData,
+): Promise<CreateFeedbackState> {
+  const values: CreateFeedbackValues = {
+    title: String(formData.get("title") ?? "").trim(),
+    content: String(formData.get("content") ?? "").trim(),
+    category: String(formData.get("category") ?? ""),
+  };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 필요해요.", values };
+
+  if (!values.title) return { error: "제목을 입력해주세요.", values };
+  if (values.title.length > 80)
+    return { error: "제목은 80자 이하로 입력해주세요.", values };
+  if (!values.content) return { error: "내용을 입력해주세요.", values };
+  if (values.content.length > 1000)
+    return { error: "내용은 1000자 이하로 입력해주세요.", values };
+  if (!isFeedbackCategory(values.category))
+    return { error: "의견 종류를 선택해주세요.", values };
+
+  const { data, error } = await supabase
+    .from("posts")
+    .insert({
+      user_id: user.id,
+      post_type: "feedback",
+      title: values.title,
+      content: values.content,
+      region: null,
+      category: values.category,
+      place_name: null,
+      place_url: null,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    return { error: `의견 저장에 실패했어요. (${error.message})`, values };
+  }
+
+  revalidatePath("/community/feedback");
   redirect(`/community/${data.id}`);
 }
 
