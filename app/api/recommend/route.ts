@@ -113,10 +113,6 @@ export async function POST(request: Request) {
   // 4) 큐레이션 데이터 + AI 호출
   const curated = await getCuratedPlaces({ regions: [input.region] });
   const now = new Date();
-  // TODO(temp-debug): 큐레이션 카운트 확인용. 실데이터 들어오면 제거.
-  console.log(
-    `[recommend] region=${input.region} curated=${curated.length} season=${getSeasonKst(now)}`
-  );
   const userPrompt = buildUserPrompt(input, curated, {
     today: getTodayKst(now),
     season: getSeasonKst(now),
