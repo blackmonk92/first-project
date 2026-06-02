@@ -282,7 +282,7 @@
 
 1. **Supabase 콘솔**: `waitlist` 테이블 생성. 컬럼은 현재 `Entry` 타입과 1:1 매핑 — `email`, `region`, `tripType`, `travelTime`, `companion`, `ageGroups` (text[]), `moods` (text[]), `indoorOutdoor`, `planB`, `place`, `createdAt`.
 2. **신규 파일** `lib/supabase.ts` — `@supabase/supabase-js`의 `createClient`로 서버용 클라이언트 초기화.
-3. **`.env.local` / Vercel 환경변수** — `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` 추가. service role은 서버 라우트에서만 사용.
+3. **`.env.local` / Vercel 환경변수** — `NEXT_PUBLIC_SUPABASE_URL`, ~~`SUPABASE_SERVICE_ROLE_KEY`~~ 추가. *(2026-06-02 정리: 실제 구현은 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 사용, service role 미도입 — RLS 내 동작.)*
 4. **`app/api/waitlist/route.ts`** — `fs.readFile`/`fs.writeFile` 부분을 `supabase.from('waitlist').insert(entry)` 한 줄로 교체.
 
 컴포넌트(`waitlist-form.tsx`)는 변경 불필요. `Entry` 타입은 그대로 유지.
@@ -606,9 +606,13 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
      리스크라 가장 먼저 처리.
 
 **2. 단계 6 Phase 1 나머지**
-   - #7 전역 `app/not-found.tsx` 추가 (현재 `/r/[id]/not-found.tsx`만 존재)
-   - #8 `app/api/recommend/route.ts` 임시 디버그 로그(`TODO(temp-debug)`) 제거
-   - #6 결과 페이지(`/r/[id]`) OG 메타(og:title/description/image)
+   - ✅ #7 전역 `app/not-found.tsx` 추가 — 완료(bd8b3cf)
+   - ✅ #8 `app/api/recommend/route.ts` 임시 디버그 로그 제거 — 완료(bd8b3cf)
+   - #6 결과 페이지(`/r/[id]`) OG 메타(og:title/description/image) — 남은 항목
+
+**2-B. 사전 예방 필터링 (신설 · 1차 공개 필수)**
+   - 금칙어 blocklist + 빈도 제한(서버사이드). 닉네임 욕설 필터(C2)와 같은 모듈 공유.
+   - 패턴·AI·CAPTCHA는 1차 공개 후 운영하며 도입 판단.
 
 **3. 단계 6 Phase 2 — 인프라**
    - OpenRouter 크레딧 충전, Vercel 환경변수 설정
@@ -625,7 +629,8 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
 
 ### 환경 / 인프라
 - Vercel 환경변수 설정 (`OPENROUTER_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`,
-  `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SITE_URL` 등)
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`)
+  - service role은 현재 불필요(트리거 `security definer`로 프로필 생성, 앱은 RLS 내 동작). admin 일괄 작업 필요해지면 재도입.
 - 도메인 연결, production 빌드 검증
 - OpenRouter 크레딧 충전 (1차 공개 트래픽 대비)
 - `app/api/recommend/route.ts`의 임시 디버그 로그
@@ -745,23 +750,31 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
   추측 가능 → 봇 크롤링·스팸·피싱·credential stuffing 공격에 활용 가능
 - 개인정보보호 법적 리스크. 1차 공개 전 반드시 차단.
 
-### 작업 범위
-- DB 마이그레이션: `profiles` 테이블 또는 `users.nickname` 컬럼 추가
-- 회원가입 흐름: 닉네임 입력 단계 추가 (기존 폼 분기)
-- 기존 사용자 마이그레이션: 닉네임 미설정 사용자 처리 (강제 입력 모달 vs
-  자동 생성 vs 첫 글 작성 시 입력)
-- 표시 변경: 커뮤니티 글·댓글에서 이메일 앞부분 대신 닉네임 노출
+### 정책 결정 (2026-06-02 확정)
+- **중복 허용**: ❌ 유니크 강제 — `lower(nickname)` 유니크 인덱스 (Travel·travel 동일 취급, 사칭 방지)
+- **변경 횟수**: 무제한 *(어뷰징 신고 시 30일 1회 제한 전환 검토 — 후속 항목)*
+- **욕설 필터**: blocklist + 우회 정규화 패턴 매칭 (ㅅㅂ·s.b·ㅅ_ㅂ 등). 글·댓글·닉네임 공유 모듈
+- **글자 수**: 2~20자, 한/영/숫자/`_` `.` 허용, 공백·이모지 차단
+- **미설정·신규 처리**: 자동 생성 `여행자`+4자리 랜덤. 트리거+backfill로 신규/기존 전원 처리(코드 분기 없음). 의미 있는 닉 전환은 변경 UI(C4)로 유도
 
-### 정책 결정 (작업 전 확정 필요)
-- 중복 허용 여부
-- 변경 가능 횟수 (예: 30일 1회 / 무제한 / 평생 1회)
-- 욕설·부적절 단어 필터 (간단 blocklist vs 외부 API)
-- 글자 수 제한 (예: 2~20자)
-- 최초 미설정 사용자 처리 방식
+### profiles 스키마 (확정)
+- 컬럼: `id`(uuid PK, `auth.users(id)` 참조 `on delete cascade`), `nickname`(text not null), `created_at`, `updated_at`
+- 유니크: `create unique index ... (lower(nickname))`
+- RLS 3정책: SELECT(누구나) / INSERT·UPDATE(본인만) / DELETE 정책 없음(cascade 정리)
+- 자동 생성: `gen_unique_nickname()` + `handle_new_user()` 트리거 + 기존 사용자 backfill
+- backfill 안전장치: 사후 중복 점검 — `select lower(nickname), count(*) from public.profiles group by 1 having count(*) > 1` 결과 0건 확인
+
+### 작업 순서 (4커밋)
+- **C1. DB 마이그레이션** — profiles + RLS + 트리거 + backfill (SQL 재검토 → `apply_migration`, 백필 후 중복 점검 쿼리 1회)
+- **C2. 검증 모듈** — `lib/moderation/`: 길이·문자셋·blocklist·우회 정규화. 글·댓글·닉네임 공유 (순수 함수 + 테스트). C1과 독립
+- **C3. 작성자 표시 교체** — 뷰 `author_email`→`author_nickname`(profiles 조인), `maskAuthor` 제거, UI 교체. 이 커밋에서 이메일 노출 실제 차단.
+  - ⚠️ 진입 직전 `posts_with_counts`·`comments_with_author` 라이브 DDL + posts/comments user_id 컬럼명 확인 (5/28 뷰 post_type 누락 재발 방지)
+- **C4. 닉네임 변경 UI** — 마이페이지 변경 폼 + C2 검증 연결 + 유니크 충돌 처리
+
+신규 가입 입력칸 추가 커밋 불필요(자동 생성 통일).
 
 ### 작업 추정
-1.5~2.5시간 (정책 결정 + 마이그레이션 + 흐름 분기 + 표시 변경).
+~2시간. C1→C3가 보안 핵심 경로, C4는 보너스. 컨디션 따라 커밋 단위로 끊기 가능.
 
 ### 진행 순서
-커밋 2 완료 → 정책 결정 의논 → 마이그레이션 SQL 검토·승인 → 코드 변경
-→ dev 미리보기 → 커밋.
+정책·스키마 확정(완료) → C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검 → C2~C4 순차.
