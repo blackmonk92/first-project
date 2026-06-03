@@ -766,7 +766,7 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
 
 ### 작업 순서 (4커밋)
 - **C1. DB 마이그레이션** ✅ **완료 (2026-06-03)** — profiles + RLS 3정책 + 트리거 + backfill 적용. 기존 사용자 1명 backfill(`여행자1299`), 중복 점검 0건. SQL 박제: `supabase/migrations/0001_nickname_system_profiles.sql` (이 repo 최초 추적 마이그레이션 — 이후 DB 변경도 동일 디렉터리에 박제)
-- **C2. 검증 모듈** — `lib/moderation/`: 길이·문자셋·blocklist·우회 정규화. 글·댓글·닉네임 공유 (순수 함수 + 테스트). C1과 독립
+- **C2. 검증 모듈** ✅ **완료 (2026-06-03)** — `lib/moderation/` 8모듈(types·blocklist·normalize·profanity·nickname·text·index). 닉네임=길이(2~20)+문자셋+욕설, 글·댓글=욕설만(`validateText`). 첫 실패 1개 반환(결정 A), 정규화 후 부분일치(C), 글·댓글 길이는 DB CHECK가 SoT(D). **vitest 도입**(첫 테스트 인프라, `npm run test`/`test:watch`) — 37 tests pass, tsc 통과
 - **C3. 작성자 표시 교체** — 뷰 `author_email`→`author_nickname`(profiles 조인), `maskAuthor` 제거, UI 교체. 이 커밋에서 이메일 노출 실제 차단.
   - ⚠️ 진입 직전 `posts_with_counts`·`comments_with_author` 라이브 DDL + posts/comments user_id 컬럼명 확인 (5/28 뷰 post_type 누락 재발 방지)
 - **C4. 닉네임 변경 UI** — 마이페이지 변경 폼 + C2 검증 연결 + 유니크 충돌 처리
@@ -777,4 +777,4 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
 ~2시간. C1→C3가 보안 핵심 경로, C4는 보너스. 컨디션 따라 커밋 단위로 끊기 가능.
 
 ### 진행 순서
-정책·스키마 확정(완료) → ~~C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검~~(완료 2026-06-03) → **C2~C4 순차**(현재 C2 진입).
+정책·스키마 확정(완료) → ~~C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검~~(완료 6-03) → ~~C2 검증 모듈+vitest~~(완료 6-03) → **C3 작성자 표시 교체**(다음, 진입 직전 뷰 라이브 DDL 확인) → C4 변경 UI.
