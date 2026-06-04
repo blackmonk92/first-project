@@ -1,5 +1,4 @@
 import { DeleteCommentButton } from "@/components/community/delete-comment-button";
-import { maskAuthor } from "@/lib/community/queries";
 import type { CommentWithAuthor } from "@/lib/community/types";
 
 function formatRelative(iso: string): string {
@@ -45,7 +44,7 @@ export function CommentList({
             <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
               <span className="truncate">
                 <span className="font-medium text-foreground">
-                  {maskAuthor(c.author_email)}
+                  {c.author_nickname}
                 </span>
                 <span className="ml-2">{formatRelative(c.created_at)}</span>
               </span>

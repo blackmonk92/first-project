@@ -767,8 +767,9 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
 ### 작업 순서 (4커밋)
 - **C1. DB 마이그레이션** ✅ **완료 (2026-06-03)** — profiles + RLS 3정책 + 트리거 + backfill 적용. 기존 사용자 1명 backfill(`여행자1299`), 중복 점검 0건. SQL 박제: `supabase/migrations/0001_nickname_system_profiles.sql` (이 repo 최초 추적 마이그레이션 — 이후 DB 변경도 동일 디렉터리에 박제)
 - **C2. 검증 모듈** ✅ **완료 (2026-06-03)** — `lib/moderation/` 8모듈(types·blocklist·normalize·profanity·nickname·text·index). 닉네임=길이(2~20)+문자셋+욕설, 글·댓글=욕설만(`validateText`). 첫 실패 1개 반환(결정 A), 정규화 후 부분일치(C), 글·댓글 길이는 DB CHECK가 SoT(D). **vitest 도입**(첫 테스트 인프라, `npm run test`/`test:watch`) — 37 tests pass, tsc 통과
-- **C3. 작성자 표시 교체** — 뷰 `author_email`→`author_nickname`(profiles 조인), `maskAuthor` 제거, UI 교체. 이 커밋에서 이메일 노출 실제 차단.
-  - ⚠️ 진입 직전 `posts_with_counts`·`comments_with_author` 라이브 DDL + posts/comments user_id 컬럼명 확인 (5/28 뷰 post_type 누락 재발 방지)
+- **C3. 작성자 표시 교체** ✅ **완료 (2026-06-04)** — 작성자 표시를 이메일→닉네임으로 전환, 이메일 노출 경로 실제 차단. 뷰 2건 `DROP+CREATE VIEW`로 `author_email`(auth.users 조인) 제거 → `author_nickname`(profiles inner JOIN). 코드 5곳 교체(`types.ts` 2 타입, `queries.ts` `maskAuthor` 제거, 표시 3곳 page·post-card·comment-list). SQL 박제: `supabase/migrations/0002_posts_with_counts_author_nickname.sql`·`0003_comments_with_author_nickname.sql`.
+  - 진입 직전 라이브 DDL 확인: 두 뷰 모두 `user_id`(posts/comments 동일, `author_id` 아님), `posts_with_counts` 13컬럼·`comments_with_author` 6컬럼 — 교체 후 개수·순서 유지 확인.
+  - inner JOIN 안전성 검증: posts/comments user_id의 profiles 미매칭 0건, auth.users 미매칭 0건(C1 backfill+트리거 효과) → inner JOIN 채택. `npm run test` 37 pass, tsc 0.
 - **C4. 닉네임 변경 UI** — 마이페이지 변경 폼 + C2 검증 연결 + 유니크 충돌 처리
 
 신규 가입 입력칸 추가 커밋 불필요(자동 생성 통일).
@@ -777,4 +778,4 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
 ~2시간. C1→C3가 보안 핵심 경로, C4는 보너스. 컨디션 따라 커밋 단위로 끊기 가능.
 
 ### 진행 순서
-정책·스키마 확정(완료) → ~~C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검~~(완료 6-03) → ~~C2 검증 모듈+vitest~~(완료 6-03) → **C3 작성자 표시 교체**(다음, 진입 직전 뷰 라이브 DDL 확인) → C4 변경 UI.
+정책·스키마 확정(완료) → ~~C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검~~(완료 6-03) → ~~C2 검증 모듈+vitest~~(완료 6-03) → ~~C3 작성자 표시 교체~~(완료 6-04) → **C4 변경 UI**(다음).

@@ -16,7 +16,7 @@ export type Post = {
 };
 
 export type PostWithCounts = Post & {
-  author_email: string;
+  author_nickname: string;
   like_count: number;
   comment_count: number;
 };
@@ -30,5 +30,5 @@ export type Comment = {
 };
 
 export type CommentWithAuthor = Comment & {
-  author_email: string;
+  author_nickname: string;
 };

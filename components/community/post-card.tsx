@@ -3,7 +3,6 @@ import Link from "next/link";
 import { RegionTag } from "@/components/community/region-tag";
 import { CategoryTag } from "@/components/community/category-tag";
 import { DeletePostButton } from "@/components/community/delete-post-button";
-import { maskAuthor } from "@/lib/community/queries";
 import type { PostWithCounts } from "@/lib/community/types";
 
 function formatRelative(iso: string): string {
@@ -61,7 +60,7 @@ export function PostCard({
           </p>
         )}
         <div className="mt-auto flex items-center justify-between pt-1 text-xs text-muted-foreground">
-          <span className="truncate">{maskAuthor(post.author_email)}</span>
+          <span className="truncate">{post.author_nickname}</span>
           <span className="flex items-center gap-3">
             <span>♥ {post.like_count}</span>
             <span>💬 {post.comment_count}</span>

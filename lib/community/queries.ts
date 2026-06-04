@@ -122,9 +122,3 @@ export async function hasUserLikedPost(
   }
   return data !== null;
 }
-
-// 이메일에서 @ 앞부분만 노출 (MVP용 작성자 표시).
-export function maskAuthor(email: string): string {
-  const at = email.indexOf("@");
-  return at === -1 ? email : email.slice(0, at);
-}

@@ -13,7 +13,6 @@ import {
   getPost,
   hasUserLikedPost,
   listComments,
-  maskAuthor,
 } from "@/lib/community/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -75,7 +74,7 @@ export default async function CommunityPostPage({
           </div>
 
           <p className="mt-3 text-sm text-muted-foreground">
-            {maskAuthor(post.author_email)}
+            {post.author_nickname}
           </p>
 
           <div className="mt-8 whitespace-pre-line text-base leading-relaxed text-foreground">
