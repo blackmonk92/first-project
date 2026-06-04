@@ -613,6 +613,7 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
 **2-B. 사전 예방 필터링 (신설 · 1차 공개 필수)**
    - 금칙어 blocklist + 빈도 제한(서버사이드). 닉네임 욕설 필터(C2)와 같은 모듈 공유.
    - 패턴·AI·CAPTCHA는 1차 공개 후 운영하며 도입 판단.
+   - ✅ **작성 경로 연결 완료 (2026-06-04)** — C2 `validateText`를 글·댓글 작성 액션(`app/community/actions.ts`)에 연결. `createPost`(제목·본문·장소명), `createFeedback`(제목·본문), `createComment`(본문) insert 직전 욕설 검사. 기존 검증(필수·길이·카테고리) 뒤, 첫 실패 1개 `{ error, values }` 반환(폼 UI 무수정). tsc 0, 37 tests pass.
 
 **3. 단계 6 Phase 2 — 인프라**
    - OpenRouter 크레딧 충전, Vercel 환경변수 설정

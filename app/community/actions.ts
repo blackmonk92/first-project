@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isRegion } from "@/lib/regions";
 import { isFeedbackCategory, isPlaceCategory } from "@/lib/community/categories";
+import { validateText } from "@/lib/moderation";
 
 export type CreatePostValues = {
   title: string;
@@ -51,6 +52,16 @@ export async function createPost(
     return { error: "지역을 선택해주세요.", values };
   if (!isPlaceCategory(values.category))
     return { error: "장소 구분을 선택해주세요.", values };
+
+  // 욕설 검사(제목 → 본문 → 장소명). 길이/필수 통과 후, insert 직전에.
+  const titleCheck = validateText(values.title);
+  if (!titleCheck.ok) return { error: titleCheck.message, values };
+  const contentCheck = validateText(values.content);
+  if (!contentCheck.ok) return { error: contentCheck.message, values };
+  if (values.placeName) {
+    const placeCheck = validateText(values.placeName);
+    if (!placeCheck.ok) return { error: placeCheck.message, values };
+  }
 
   const { data, error } = await supabase
     .from("posts")
@@ -112,6 +123,12 @@ export async function createFeedback(
     return { error: "내용은 1000자 이하로 입력해주세요.", values };
   if (!isFeedbackCategory(values.category))
     return { error: "의견 종류를 선택해주세요.", values };
+
+  // 욕설 검사(제목 → 본문). 길이/필수 통과 후, insert 직전에.
+  const titleCheck = validateText(values.title);
+  if (!titleCheck.ok) return { error: titleCheck.message, values };
+  const contentCheck = validateText(values.content);
+  if (!contentCheck.ok) return { error: contentCheck.message, values };
 
   const { data, error } = await supabase
     .from("posts")
@@ -210,6 +227,10 @@ export async function createComment(
   if (!content) return { error: "댓글 내용을 입력해주세요.", values };
   if (content.length > 500)
     return { error: "댓글은 500자 이하로 입력해주세요.", values };
+
+  // 욕설 검사. 길이/필수 통과 후, insert 직전에(글 단계와 동일).
+  const contentCheck = validateText(content);
+  if (!contentCheck.ok) return { error: contentCheck.message, values };
 
   const { error } = await supabase
     .from("comments")
