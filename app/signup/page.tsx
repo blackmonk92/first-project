@@ -20,7 +20,7 @@ export default async function SignupPage() {
   return (
     <AuthCard
       title="회원가입"
-      description="이메일로 가입하고 출시 알림을 가장 먼저 받아보세요."
+      description="가입하면 맞춤 코스 추천과 커뮤니티를 모두 이용할 수 있어요."
       footer={
         <>
           이미 가입하셨나요?{" "}

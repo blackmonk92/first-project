@@ -637,13 +637,17 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
 - `app/api/recommend/route.ts`의 임시 디버그 로그
   `console.log("[recommend] ...")` (`TODO(temp-debug)` 마커) 제거
 
-### 메인 화면 카피 정리
-- **CTA 버튼 문구 수정** — 현재 "출시 알림 신청하기"인데, 추천 기능이
-  실제 작동하니까 "추천 받아보기" 같은 문구로 교체. 액션 지점도 추천
-  폼(`/#recommend` 또는 직접 폼 섹션)으로 변경.
-- **부제·서브카피 1차 공개 시점 톤 점검** — 랜딩 페이지 전반의 카피를
-  "출시 전 대기자 모집" 톤에서 "실제 사용 가능" 톤으로 정합성 맞추기.
-  (Hero 문구, Problem 섹션, 작동방식, 예시 코스 카드 주변 카피 포함)
+### 메인 화면 카피 정리 — ✅ 완료 (2026-06-04)
+- **CTA 버튼 문구 수정** — ✅ 완료. Hero CTA "추천 받아보기" + `#recommend`(이미 적용),
+  푸터 "의견 남기기"(2.10 ✅). 메인 랜딩은 이미 "실사용" 톤 정합.
+- **부제·서브카피 톤 점검** — ✅ 완료. 키워드 grep 결과 Hero·Problem·작동방식·예시
+  코스엔 "출시 전/대기자" 톤 없음(이미 정합). 유일한 실노출 잔재였던
+  `app/signup/page.tsx` 설명("출시 알림을 가장 먼저") → "가입하면 맞춤 코스 추천과
+  커뮤니티를 모두 이용할 수 있어요."로 교체.
+- 🧹 **별도 cleanup 후보 (1차 공개 후 검토)** — waitlist 고아 코드 제거:
+  `components/sections/waitlist-section.tsx`·`waitlist-form.tsx`(어디서도 import 안 됨,
+  홈에서 빠진 상태) + `app/api/waitlist/route.ts` 라우트 + `.data/waitlist.json` 흐름.
+  대기자 퍼널이 추천 퍼널로 대체되어 사용되지 않음. 화면 노출은 없으나 dead code.
 
 ### 공유 미리보기 (OG 메타) + 모바일 production 검증
 - **OG 메타 태그 세팅** — 결과 페이지(`/r/[id]`)에 `og:title`,
