@@ -10,6 +10,17 @@ export async function SiteHeader() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // 로그인 시 닉네임 조회(마이페이지 진입점 + 본인 식별 표시). 미로그인이면 스킵.
+  let nickname: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("nickname")
+      .eq("id", user.id)
+      .single();
+    nickname = profile?.nickname ?? null;
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/70 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
@@ -46,9 +57,12 @@ export async function SiteHeader() {
         <div className="hidden shrink-0 items-center gap-2 sm:gap-3 md:flex">
           {user ? (
             <>
-              <span className="hidden max-w-[180px] truncate text-xs text-muted-foreground sm:inline">
-                {user.email}
-              </span>
+              <Link
+                href="/mypage"
+                className="hidden max-w-[180px] truncate text-xs font-medium text-foreground underline-offset-4 transition-colors hover:text-brand hover:underline sm:inline"
+              >
+                {nickname ?? "마이페이지"}
+              </Link>
               <form action={logout}>
                 <button
                   type="submit"
@@ -84,7 +98,7 @@ export async function SiteHeader() {
           >
             추천 받아보기
           </a>
-          <MobileNav userEmail={user?.email ?? null} />
+          <MobileNav userNickname={user ? (nickname ?? "마이페이지") : null} />
         </div>
       </div>
     </header>

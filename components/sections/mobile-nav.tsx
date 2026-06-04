@@ -6,10 +6,10 @@ import Link from "next/link";
 import { logout } from "@/app/auth/actions";
 
 type Props = {
-  userEmail: string | null;
+  userNickname: string | null;
 };
 
-export function MobileNav({ userEmail }: Props) {
+export function MobileNav({ userNickname }: Props) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -83,11 +83,18 @@ export function MobileNav({ userEmail }: Props) {
             </Link>
           </nav>
           <div className="border-t border-border" />
-          {userEmail ? (
+          {userNickname !== null ? (
             <div className="py-2">
               <p className="truncate px-4 py-1 text-xs text-muted-foreground">
-                {userEmail}
+                {userNickname}
               </p>
+              <Link
+                href="/mypage"
+                onClick={close}
+                className="block whitespace-nowrap px-4 py-2.5 text-foreground transition-colors hover:bg-accent/40"
+              >
+                마이페이지
+              </Link>
               <form action={logout}>
                 <button
                   type="submit"

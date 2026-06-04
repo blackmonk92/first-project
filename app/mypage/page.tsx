@@ -36,7 +36,9 @@ export default async function MyPage() {
             마이페이지
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            닉네임은 커뮤니티 글·댓글에 표시되는 이름이에요. 언제든 바꿀 수 있어요.
+            닉네임은 커뮤니티 글·댓글에 표시되는 이름이에요.
+            <br />
+            언제든 바꿀 수 있어요.
           </p>
           <div className="mt-8">
             <NicknameForm currentNickname={profile?.nickname ?? ""} />
