@@ -608,7 +608,7 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
 **2. 단계 6 Phase 1 나머지**
    - ✅ #7 전역 `app/not-found.tsx` 추가 — 완료(bd8b3cf)
    - ✅ #8 `app/api/recommend/route.ts` 임시 디버그 로그 제거 — 완료(bd8b3cf)
-   - #6 결과 페이지(`/r/[id]`) OG 메타(og:title/description/image) — 남은 항목
+   - ✅ #6 결과 페이지(`/r/[id]`) OG 메타 — **1차 완료 (2026-06-04, 이미지 후속)**. 전역(`app/layout.tsx`): `metadataBase`(NEXT_PUBLIC_SITE_URL 없으면 localhost fallback, 배포 때 승격) + openGraph 보강(siteName·locale·url) + twitter summary_large_image 카드. 결과 페이지: `generateMetadata`로 동적 title(`[오늘 어디 갈래?] {region·regionDetail·companion} 주말 코스`)·description(hasResult면 planA 요약, 없으면 기본). ⚠️ title·description에 `input.email` 등 민감정보 미포함(C3 일관성). **og:image는 후속(C2 동적 OG)**, 실제 URL은 배포(Phase 2)에서 env 등록.
 
 **2-B. 사전 예방 필터링 (신설 · 1차 공개 필수)**
    - 금칙어 blocklist + 빈도 제한(서버사이드). 닉네임 욕설 필터(C2)와 같은 모듈 공유.
