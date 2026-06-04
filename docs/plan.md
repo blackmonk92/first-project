@@ -770,7 +770,10 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
 - **C3. 작성자 표시 교체** ✅ **완료 (2026-06-04)** — 작성자 표시를 이메일→닉네임으로 전환, 이메일 노출 경로 실제 차단. 뷰 2건 `DROP+CREATE VIEW`로 `author_email`(auth.users 조인) 제거 → `author_nickname`(profiles inner JOIN). 코드 5곳 교체(`types.ts` 2 타입, `queries.ts` `maskAuthor` 제거, 표시 3곳 page·post-card·comment-list). SQL 박제: `supabase/migrations/0002_posts_with_counts_author_nickname.sql`·`0003_comments_with_author_nickname.sql`.
   - 진입 직전 라이브 DDL 확인: 두 뷰 모두 `user_id`(posts/comments 동일, `author_id` 아님), `posts_with_counts` 13컬럼·`comments_with_author` 6컬럼 — 교체 후 개수·순서 유지 확인.
   - inner JOIN 안전성 검증: posts/comments user_id의 profiles 미매칭 0건, auth.users 미매칭 0건(C1 backfill+트리거 효과) → inner JOIN 채택. `npm run test` 37 pass, tsc 0.
-- **C4. 닉네임 변경 UI** — 마이페이지 변경 폼 + C2 검증 연결 + 유니크 충돌 처리
+- **C4. 닉네임 변경 UI** ✅ **완료 (2026-06-04)** — 마이페이지(`app/mypage/`)에서 본인 닉네임 변경. 서버 액션 `updateNickname`(getUser → C2 `validateNickname` → `UPDATE profiles`(RLS 본인+id 이중가드) → `23505`(`lower(nickname)` 유니크 위반) 캐치 → revalidate, `useActionState` 호환). 폼은 shadcn Input/Button/Label + `useFormStatus` pending, 에러(destructive)·성공(brand 액센트) 메시지. `updated_at`은 DB 트리거로 처리 — SQL 박제: `supabase/migrations/0004_profiles_updated_at_trigger.sql`(`set_updated_at()` 범용 함수 + `profiles_set_updated_at` BEFORE UPDATE, moddatetime 확장 의존 없음).
+  - 유니크 충돌은 사전 SELECT 대신 인덱스 위반(23505) 캐치(TOCTOU 경합 회피). 검증: tsc 0, 트리거 실갱신 확인(before<after), 브라우저로 에러·성공·충돌 경로 확인.
+
+닉네임 제도 C1~C4 전체 완료 — C1 스키마+트리거 → C2 검증모듈 → C3 이메일 노출 차단 → C4 변경 UI.
 
 신규 가입 입력칸 추가 커밋 불필요(자동 생성 통일).
 
@@ -778,4 +781,4 @@ post_type 도입 의도 / 단일 category + discriminator 선택 이유 /
 ~2시간. C1→C3가 보안 핵심 경로, C4는 보너스. 컨디션 따라 커밋 단위로 끊기 가능.
 
 ### 진행 순서
-정책·스키마 확정(완료) → ~~C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검~~(완료 6-03) → ~~C2 검증 모듈+vitest~~(완료 6-03) → ~~C3 작성자 표시 교체~~(완료 6-04) → **C4 변경 UI**(다음).
+정책·스키마 확정(완료) → ~~C1 SQL 검토·승인 → `apply_migration` → 백필 중복 점검~~(완료 6-03) → ~~C2 검증 모듈+vitest~~(완료 6-03) → ~~C3 작성자 표시 교체~~(완료 6-04) → ~~C4 변경 UI~~(완료 6-04). **닉네임 제도 전체 완료.**
