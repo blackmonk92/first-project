@@ -610,12 +610,17 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
    - 패턴·AI·CAPTCHA는 1차 공개 후 운영하며 도입 판단.
    - ✅ **작성 경로 연결 완료 (2026-06-04)** — C2 `validateText`를 글·댓글 작성 액션(`app/community/actions.ts`)에 연결. `createPost`(제목·본문·장소명), `createFeedback`(제목·본문), `createComment`(본문) insert 직전 욕설 검사. 기존 검증(필수·길이·카테고리) 뒤, 첫 실패 1개 `{ error, values }` 반환(폼 UI 무수정). tsc 0, 37 tests pass.
 
-**3. 단계 6 Phase 2 — 인프라**
-   - OpenRouter 크레딧 충전, Vercel 환경변수 설정
+**3. 단계 6 Phase 2 — 인프라** — ✅ 완료
+   - ✅ OpenRouter 크레딧 충전, Vercel 환경변수 설정 (대시보드 등록 완료)
 
-**4. 단계 6 Phase 3 — 배포·검증**
-   - production 빌드, 도메인 연결, 모바일 share/clipboard HTTPS 검증,
-     카톡 OG 미리보기 확인
+**4. 단계 6 Phase 3 — 배포·검증** — ✅ 완료 (라이브)
+   - ✅ production 배포됨: **https://first-project-five-pi-28.vercel.app**
+   - **배포 방식**: Vercel 대시보드 ↔ GitHub 저장소(`blackmonk92/first-project`) 연동.
+     **main 브랜치에 push하면 Vercel이 자동 감지해 배포** (로컬 CLI 배포 아님).
+   - ⚠️ **로컬에 `.vercel/`·`vercel.json` 없는 게 정상** (GitHub 연동 배포라 로컬 연결 파일 불필요).
+     **로컬에서 Vercel CLI `link` 하지 말 것** — 배포 경로 이원화 방지.
+   - 잔여 후속: 도메인 연결(현재 vercel.app 서브도메인), 모바일 share/clipboard HTTPS 검증,
+     카톡 OG 미리보기 실측
 
 **5. 배포 후 발견·성장 기능 (다음 세션 · 2026-06-04 기록)**
 
@@ -666,11 +671,15 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
 1차 공개 직전에 한 번에 정리할 항목. 단계 5-C(공유 기능) 완료 후 진입.
 
 ### 환경 / 인프라
-- Vercel 환경변수 설정 (`OPENROUTER_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`,
-  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`)
+> ✅ **이미 라이브 배포됨** — https://first-project-five-pi-28.vercel.app
+> 배포 방식: Vercel↔GitHub(`blackmonk92/first-project`) 연동, **main push → 자동 배포**.
+> ⚠️ 로컬에 `.vercel/`·`vercel.json` 없는 게 정상. **로컬 Vercel CLI `link` 하지 말 것**(배포 경로 이원화 방지).
+
+- ✅ Vercel 환경변수 설정 완료 (`OPENROUTER_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`) — 대시보드 등록됨
   - service role은 현재 불필요(트리거 `security definer`로 프로필 생성, 앱은 RLS 내 동작). admin 일괄 작업 필요해지면 재도입.
-- 도메인 연결, production 빌드 검증
-- OpenRouter 크레딧 충전 (1차 공개 트래픽 대비)
+- 도메인 연결(잔여 — 현재 vercel.app 서브도메인), production 빌드 검증 ✅
+- ✅ OpenRouter 크레딧 충전 완료 (1차 공개 트래픽 대비)
 - `app/api/recommend/route.ts`의 임시 디버그 로그
   `console.log("[recommend] ...")` (`TODO(temp-debug)` 마커) 제거
 
