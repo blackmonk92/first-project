@@ -22,7 +22,7 @@
 
 - **스택**: Next.js 16 (App Router) · React 19 · Tailwind v4 · shadcn · Supabase (`@supabase/ssr`) · OpenRouter (AI 추천)
 - **구조**:
-  - `app/` — `api`(recommend·waitlist) · `auth` · `community` · `mypage` · `signup` · `r`(공유 결과 페이지)
+  - `app/` — `api`(recommend) · `auth` · `community` · `mypage` · `signup` · `r`(공유 결과 페이지)
   - `lib/` — `curation` · `moderation` · `recommend` · `rate-limit` · `supabase` · `regions.ts`
   - `components/` — `sections` · `community` · `ui`
   - `supabase/migrations/` — DB 스키마 박제

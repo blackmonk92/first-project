@@ -274,18 +274,13 @@
 
 ---
 
-## 다음 단계 — Supabase 연동
+## 대기자 폼(waitlist) — 은퇴·제거 (2026-07-13)
 
-랜딩 페이지 콘텐츠 작업 완료(2026-05-19). 현재 `/api/waitlist`는 로컬 `.data/waitlist.json`에 저장 — Vercel 프로덕션에선 ephemeral 파일 시스템 때문에 데이터 손실 위험. 사용자는 Supabase 가입 완료 상태.
+**결정: 대기자 폼 기능은 완전히 미사용 → 코드 제거. 가입자는 Supabase Auth(회원가입)로만 받는다.**
 
-다음 세션에 처리:
-
-1. **Supabase 콘솔**: `waitlist` 테이블 생성. 컬럼은 현재 `Entry` 타입과 1:1 매핑 — `email`, `region`, `tripType`, `travelTime`, `companion`, `ageGroups` (text[]), `moods` (text[]), `indoorOutdoor`, `planB`, `place`, `createdAt`.
-2. **신규 파일** `lib/supabase.ts` — `@supabase/supabase-js`의 `createClient`로 서버용 클라이언트 초기화.
-3. **`.env.local` / Vercel 환경변수** — `NEXT_PUBLIC_SUPABASE_URL`, ~~`SUPABASE_SERVICE_ROLE_KEY`~~ 추가. *(2026-06-02 정리: 실제 구현은 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` 사용, service role 미도입 — RLS 내 동작.)*
-4. **`app/api/waitlist/route.ts`** — `fs.readFile`/`fs.writeFile` 부분을 `supabase.from('waitlist').insert(entry)` 한 줄로 교체.
-
-컴포넌트(`waitlist-form.tsx`)는 변경 불필요. `Entry` 타입은 그대로 유지.
+- 배경: 대기자 퍼널이 추천 퍼널로 대체되며 waitlist 컴포넌트는 어느 페이지에서도 import되지 않는 고아 코드가 됨(화면 노출 없음). API는 로컬 `.data/waitlist.json`에 저장 — Vercel의 ephemeral 파일시스템에선 쓰기 실패/데이터 손실이라 애초에 프로덕션에서 동작 불가였음.
+- 제거한 것: `app/api/waitlist/route.ts`, `components/sections/waitlist-section.tsx`, `components/sections/waitlist-form.tsx`, `.gitignore`의 `/.data/` 항목.
+- 결과: "가입자 수 = Supabase Authentication의 계정 수" 한 곳만 보면 됨(현재 3명, `public.profiles`와 일치). 과거 계획했던 waitlist→Supabase 테이블 이관은 폐기(진행 안 함).
 
 ---
 
@@ -643,7 +638,7 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
 
 *기존 후속*
    - og:image 동적 OG(C2) — 배포 후 카톡 실측과 묶임.
-   - waitlist 고아 코드 cleanup(`waitlist-section`·`waitlist-form`·`/api/waitlist`).
+   - ~~waitlist 고아 코드 cleanup~~ → ✅ 완료(2026-07-13, 3개 파일 제거). 위 "대기자 폼 은퇴" 섹션 참조.
 
 ---
 
@@ -667,10 +662,9 @@ end-to-end 정상(사용자 확인), `/community` 회귀 없음.
   코스엔 "출시 전/대기자" 톤 없음(이미 정합). 유일한 실노출 잔재였던
   `app/signup/page.tsx` 설명("출시 알림을 가장 먼저") → "가입하면 맞춤 코스 추천과
   커뮤니티를 모두 이용할 수 있어요."로 교체.
-- 🧹 **별도 cleanup 후보 (1차 공개 후 검토)** — waitlist 고아 코드 제거:
-  `components/sections/waitlist-section.tsx`·`waitlist-form.tsx`(어디서도 import 안 됨,
-  홈에서 빠진 상태) + `app/api/waitlist/route.ts` 라우트 + `.data/waitlist.json` 흐름.
-  대기자 퍼널이 추천 퍼널로 대체되어 사용되지 않음. 화면 노출은 없으나 dead code.
+- 🧹 ~~**별도 cleanup 후보** — waitlist 고아 코드 제거~~ → ✅ 완료(2026-07-13).
+  `waitlist-section.tsx`·`waitlist-form.tsx`·`app/api/waitlist/route.ts` 제거,
+  `.data/waitlist.json` 흐름·`.gitignore` 항목 정리. 위 "대기자 폼 은퇴" 섹션 참조.
 
 ### 공유 미리보기 (OG 메타) + 모바일 production 검증
 - **OG 메타 태그 세팅** — 결과 페이지(`/r/[id]`)에 `og:title`,

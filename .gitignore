@@ -36,9 +36,6 @@ yarn-error.log*
 # vercel
 .vercel
 
-# local waitlist data (dummy storage)
-/.data/
-
 # claude code local state
 /.claude/
 
